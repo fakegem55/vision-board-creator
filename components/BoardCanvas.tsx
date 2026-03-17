@@ -45,24 +45,12 @@ const BoardCanvas = forwardRef<HTMLDivElement, Props>(({ board }, ref) => {
             className="mx-6 px-6 py-4 rounded-2xl text-center"
             style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)' }}
           >
-            <span
-              className="block text-white/50 text-2xl leading-none mb-1"
-              style={{ fontFamily: 'Georgia, serif' }}
-            >
-              "
-            </span>
             <p
               className="text-white text-2xl leading-snug tracking-wide"
               style={{ fontFamily: 'var(--font-dancing), cursive' }}
             >
               {board.affirmation}
             </p>
-            <span
-              className="block text-white/50 text-2xl leading-none mt-1"
-              style={{ fontFamily: 'Georgia, serif' }}
-            >
-              "
-            </span>
           </div>
         </div>
       )}
