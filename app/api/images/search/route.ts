@@ -15,6 +15,23 @@ function getCached(key: string): UnsplashPhoto[] | null {
   return entry.photos;
 }
 
+// IP당 시간당 최대 API 호출 수 (서버 캐시 히트는 카운트 안 함)
+const RATE_LIMIT = 20;
+const RATE_TTL_MS = 60 * 60 * 1000; // 1시간
+const ipRateMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = ipRateMap.get(ip);
+  if (!record || now >= record.resetAt) {
+    ipRateMap.set(ip, { count: 1, resetAt: now + RATE_TTL_MS });
+    return true;
+  }
+  if (record.count >= RATE_LIMIT) return false;
+  record.count++;
+  return true;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const query = searchParams.get('q');
@@ -32,6 +49,12 @@ export async function GET(request: NextRequest) {
   const cacheKey = `${query}__${page}`;
   const cached = getCached(cacheKey);
   if (cached) return NextResponse.json({ photos: cached });
+
+  // 서버 캐시 미스 시에만 Rate Limit 적용 (실제 API 호출 전)
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
 
   const url = `${UNSPLASH_API}/search/photos?query=${encodeURIComponent(query)}&page=${page}&per_page=${PER_PAGE}&orientation=portrait`;
 

@@ -8,6 +8,7 @@ import { searchPhotos } from '@/lib/unsplash';
 import { buildLayout } from '@/lib/layoutEngine';
 import { downloadBoard, shareBoard } from '@/lib/exportBoard';
 import { translateToEnglish } from '@/lib/translate';
+import { getPoolPhotos } from '@/lib/imagePool';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { t } from '@/lib/i18n';
 import type { Language, Keyword, BoardData } from '@/types';
@@ -45,9 +46,13 @@ export default function Home() {
       // 번역 (사전 → 캐시 → API 순서로 최소 호출)
       const englishTexts = await Promise.all(keywords.map(resolveEnglish));
 
-      // 키워드별 후보 사진 병렬 수집 (localStorage 캐시 적용)
+      // 키워드별 후보 사진 병렬 수집 (풀 → localStorage 캐시 → API 순서)
       const allCandidates = await Promise.all(
         englishTexts.map(async text => {
+          // 1. 정적 이미지 풀 우선 (API 호출 0회)
+          const poolPhotos = getPoolPhotos(text, randomOffset);
+          if (poolPhotos.length > 0) return poolPhotos;
+          // 2. 폴백: Unsplash API (커스텀 키워드 등 풀에 없는 경우)
           const page = randomOffset ? Math.floor(Math.random() * 5) + 2 : 1;
           const photos = await searchPhotos(text, page);
           if (photos.length === 0 && randomOffset) return searchPhotos(text, 1);
