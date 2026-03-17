@@ -19,8 +19,15 @@
   }
 }
 
+html {
+  /* iOS 모멘텀 스크롤 바운스로 인한 상단 스냅 방지 */
+  overscroll-behavior-y: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* iOS 주소창 높이 변화로 인한 레이아웃 튐 방지 */
+  min-height: 100dvh;
 }
