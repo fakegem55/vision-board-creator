@@ -20,10 +20,11 @@ async function buildExportClone(element: HTMLElement): Promise<HTMLElement> {
 
   // iOS WebKit: backdrop-filter inside SVG foreignObject causes black canvas
   clone.querySelectorAll<HTMLElement>('*').forEach(el => {
-    if (el.style.backdropFilter || el.style.webkitBackdropFilter) {
-      el.style.backdropFilter = 'none';
-      el.style.webkitBackdropFilter = 'none';
-      el.style.background = 'rgba(0,0,0,0.6)';
+    const style = el.style as CSSStyleDeclaration & { webkitBackdropFilter?: string };
+    if (style.backdropFilter || style.webkitBackdropFilter) {
+      style.backdropFilter = 'none';
+      style.webkitBackdropFilter = 'none';
+      style.background = 'rgba(0,0,0,0.6)';
     }
   });
 
