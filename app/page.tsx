@@ -1,12 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import KeywordInput from '@/components/KeywordInput';
 import KeywordSuggestions from '@/components/KeywordSuggestions';
 import BoardCanvas from '@/components/BoardCanvas';
 import { searchPhotos } from '@/lib/unsplash';
 import { buildLayout } from '@/lib/layoutEngine';
-import { downloadBoard, shareBoard } from '@/lib/exportBoard';
+import { downloadBoard, shareBoard, isIOS } from '@/lib/exportBoard';
 import { translateToEnglish } from '@/lib/translate';
 import { getPoolPhotos } from '@/lib/imagePool';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -29,7 +29,7 @@ export default function Home() {
   const [board, setBoard] = useState<BoardData | null>(null);
   const [step, setStep] = useState<Step>('input');
   const [error, setError] = useState('');
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const [saveImageUrl, setSaveImageUrl] = useState<string | null>(null);
   const s = t(lang);
 
   async function resolveEnglish(kw: Keyword): Promise<string> {
@@ -95,15 +95,27 @@ export default function Home() {
 
   if (step === 'result' && board) {
     return (
-      <ResultScreen
-        board={board}
-        canvasRef={canvasRef}
-        s={s}
-        onDownload={() => canvasRef.current && downloadBoard(canvasRef.current)}
-        onShare={() => canvasRef.current && shareBoard(canvasRef.current)}
-        onRegenerate={() => generateBoard(true)}
-        onBack={() => setStep('input')}
-      />
+      <>
+        <ResultScreen
+          board={board}
+          s={s}
+          onDownload={async () => {
+            const dataUrl = await downloadBoard(board);
+            if (isIOS()) setSaveImageUrl(dataUrl);
+          }}
+          onShare={() => shareBoard(board)}
+          onRegenerate={() => generateBoard(true)}
+          onBack={() => setStep('input')}
+        />
+        {saveImageUrl && (
+          <SaveImageModal
+            dataUrl={saveImageUrl}
+            hint={s.iosSaveHint}
+            closeLabel={s.closeButton}
+            onClose={() => setSaveImageUrl(null)}
+          />
+        )}
+      </>
     );
   }
 
@@ -213,7 +225,6 @@ function LoadingScreen({ text }: { text: string }) {
 
 interface ResultScreenProps {
   board: BoardData;
-  canvasRef: React.RefObject<HTMLDivElement | null>;
   s: ReturnType<typeof t>;
   onDownload: () => void;
   onShare: () => void;
@@ -221,10 +232,10 @@ interface ResultScreenProps {
   onBack: () => void;
 }
 
-function ResultScreen({ board, canvasRef, s, onDownload, onShare, onRegenerate, onBack }: ResultScreenProps) {
+function ResultScreen({ board, s, onDownload, onShare, onRegenerate, onBack }: ResultScreenProps) {
   return (
     <main className="min-h-dvh bg-gray-950 px-4 py-8 flex flex-col gap-6 items-center">
-      <BoardCanvas ref={canvasRef} board={board} />
+      <BoardCanvas board={board} />
       <div className="flex flex-col gap-3 w-full max-w-sm">
         <button onClick={onDownload} className="w-full py-4 bg-white text-gray-900 font-bold rounded-2xl shadow">
           {s.saveButton}
@@ -240,5 +251,37 @@ function ResultScreen({ board, canvasRef, s, onDownload, onShare, onRegenerate, 
         </button>
       </div>
     </main>
+  );
+}
+
+interface SaveImageModalProps {
+  dataUrl: string;
+  hint: string;
+  closeLabel: string;
+  onClose: () => void;
+}
+
+function SaveImageModal({ dataUrl, hint, closeLabel, onClose }: SaveImageModalProps) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 px-4 gap-4"
+      onClick={onClose}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={dataUrl}
+        alt="vision board"
+        className="max-w-full max-h-[70dvh] rounded-2xl shadow-xl"
+        onClick={e => e.stopPropagation()}
+      />
+      <p className="text-white text-sm text-center px-4">{hint}</p>
+      <button
+        type="button"
+        onClick={onClose}
+        className="px-8 py-3 bg-white text-gray-900 font-bold rounded-2xl shadow"
+      >
+        {closeLabel}
+      </button>
+    </div>
   );
 }

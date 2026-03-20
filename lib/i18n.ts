@@ -20,6 +20,8 @@ export const UI = {
     backButton: '처음으로',
     errorMinKeyword: '키워드를 최소 1개 입력해주세요.',
     errorImageFetch: '이미지를 불러오는 데 실패했습니다. 다시 시도해주세요.',
+    iosSaveHint: '이미지를 길게 눌러 \'사진에 저장\'을 선택하세요',
+    closeButton: '닫기',
     count: (n: number, max: number) => `${n} / ${max}`,
   },
   en: {
@@ -41,6 +43,8 @@ export const UI = {
     backButton: 'Start Over',
     errorMinKeyword: 'Please enter at least 1 keyword.',
     errorImageFetch: 'Failed to load images. Please try again.',
+    iosSaveHint: "Long press the image and select 'Save to Photos'",
+    closeButton: 'Close',
     count: (n: number, max: number) => `${n} / ${max}`,
   },
   ja: {
@@ -62,6 +66,8 @@ export const UI = {
     backButton: 'はじめから',
     errorMinKeyword: 'キーワードを1つ以上入力してください。',
     errorImageFetch: '画像の読み込みに失敗しました。再試行してください。',
+    iosSaveHint: '画像を長押しして「写真に保存」を選択してください',
+    closeButton: '閉じる',
     count: (n: number, max: number) => `${n} / ${max}`,
   },
   zh: {
@@ -83,6 +89,8 @@ export const UI = {
     backButton: '重新开始',
     errorMinKeyword: '请输入至少1个关键词。',
     errorImageFetch: '加载图片失败，请重试。',
+    iosSaveHint: '长按图片选择「存储到相册」',
+    closeButton: '关闭',
     count: (n: number, max: number) => `${n} / ${max}`,
   },
 } satisfies Record<Language, Record<string, string | ((n: number, max: number) => string)>>;
