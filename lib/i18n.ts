@@ -28,7 +28,7 @@ export const UI = {
     title: 'Create Vision Board',
     subtitle: 'Enter keywords and affirmation to create your board',
     suggestionsLabel: 'Suggested Keywords',
-    keywordsLabel: 'My Keywords (up to 10)',
+    keywordsLabel: 'My Keywords (up to 9)',
     affirmationLabel: 'My Affirmation',
     affirmationOptional: 'optional',
     affirmationPlaceholder: 'e.g. In 2026, I grow every day',
